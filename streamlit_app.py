@@ -61,7 +61,7 @@ if query:
                     st.write(item['snippet']['channelTitle'])
                     
                     video_id = item['id']['videoId']
-                    if st.button(f"Play {item['snippet']['title']}", key=f"play_{video_id}"):
+                    if st.button(f"Play", key=f"play_{video_id}"):
                         try:
                             video_url = f"https://www.youtube.com/watch?v={video_id}"
                             with ytdl.YoutubeDL({
@@ -78,6 +78,32 @@ if query:
                                 st.audio(audio_url)
                         except Exception as e:
                             st.error(f"Failed to play audio: {str(e)}")
+                    
+                    if st.button(f"Download", key=f"download_{video_id}"):
+                        try:
+                            video_url = f"https://www.youtube.com/watch?v={video_id}"
+                            safe_title = "".join(c for c in item['snippet']['title'] if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                            with ytdl.YoutubeDL({
+                                'format': 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio',
+                                'quiet': True,
+                                'no_warnings': True,
+                                'extract_audio': True,
+                                'outtmpl': f'temp_{video_id}.%(ext)s'
+                            }) as ydl:
+                                info = ydl.extract_info(video_url, download=True)
+                                downloaded_file = f'temp_{video_id}.webm'
+                                
+                                with open(downloaded_file, 'rb') as f:
+                                    st.download_button(
+                                        label="Save MP3",
+                                        data=f,
+                                        file_name=f"{safe_title}.mp3",
+                                        mime="audio/mpeg"
+                                    )
+                                if os.path.exists(downloaded_file):
+                                    os.remove(downloaded_file)
+                        except Exception as e:
+                            st.error(f"Failed to download audio: {str(e)}")
                 
                 st.divider()
 
