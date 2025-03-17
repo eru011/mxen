@@ -1,5 +1,9 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import uvicorn
+import threading
+from main import app
+import nest_asyncio
 import requests
 import yt_dlp as ytdl
 import os
@@ -60,3 +64,25 @@ if query:
 
     except Exception as e:
         st.error(f"Search failed: {str(e)}")
+
+
+# Enable nested event loops
+nest_asyncio.apply()
+
+# Set page config
+st.set_page_config(
+    page_title="Xen Music",
+    page_icon="🎵",
+    layout="wide"
+)
+
+def run_fastapi():
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+
+# Start FastAPI in a separate thread
+if 'server_started' not in st.session_state:
+    threading.Thread(target=run_fastapi, daemon=True).start()
+    st.session_state.server_started = True
+
+# Embed your FastAPI frontend with all its interactive features
+components.iframe("http://127.0.0.1:8000", height=800, scrolling=True)
