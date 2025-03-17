@@ -76,35 +76,19 @@ if query:
                                 best_audio = max(audio_formats, key=lambda x: float(x.get('abr', 0) or 0))
                                 audio_url = best_audio['url']
                                 st.audio(audio_url)
+                                
+                                # Add download button for the direct audio URL
+                                safe_title = "".join(c for c in item['snippet']['title'] if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                                response = requests.get(audio_url)
+                                st.download_button(
+                                    label="Save as MP3",
+                                    data=response.content,
+                                    file_name=f"{safe_title}.mp3",
+                                    mime="audio/mpeg"
+                                )
                         except Exception as e:
                             st.error(f"Failed to play audio: {str(e)}")
                     
-                    if st.button(f"Download", key=f"download_{video_id}"):
-                        try:
-                            video_url = f"https://www.youtube.com/watch?v={video_id}"
-                            safe_title = "".join(c for c in item['snippet']['title'] if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                            with ytdl.YoutubeDL({
-                                'format': 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio',
-                                'quiet': True,
-                                'no_warnings': True,
-                                'extract_audio': True,
-                                'outtmpl': f'temp_{video_id}.%(ext)s'
-                            }) as ydl:
-                                info = ydl.extract_info(video_url, download=True)
-                                downloaded_file = f'temp_{video_id}.webm'
-                                
-                                with open(downloaded_file, 'rb') as f:
-                                    st.download_button(
-                                        label="Save MP3",
-                                        data=f,
-                                        file_name=f"{safe_title}.mp3",
-                                        mime="audio/mpeg"
-                                    )
-                                if os.path.exists(downloaded_file):
-                                    os.remove(downloaded_file)
-                        except Exception as e:
-                            st.error(f"Failed to download audio: {str(e)}")
-                
                 st.divider()
 
     except Exception as e:
