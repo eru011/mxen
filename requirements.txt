@@ -1,0 +1,9 @@
+streamlit
+fastapi
+python-dotenv
+yt-dlp
+requests
+jinja2
+python-multipart
+streamlit
+nest-asyncio

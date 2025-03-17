@@ -1,0 +1,78 @@
+<div class="fixed bottom-4 right-4 w-[90vw] sm:w-80 max-w-md bg-[#282828] rounded-lg shadow-2xl" id="draggable-player">
+    <div 
+        id="player-handle" 
+        class="flex items-center justify-between p-3 bg-[#1d1d1d] rounded-t-lg hover:bg-[#2d2d2d] transition-colors group cursor-move"
+    >
+        <div class="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+            <svg class="w-5 h-5 flex-shrink-0 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h8M8 15h8"/>
+            </svg>
+            <div class="truncate flex-1 min-w-0">
+                <span class="text-sm font-medium">
+                    Drag Player • <span class="text-gray-400">{{ title }}</span>
+                </span>
+            </div>
+        </div>
+        <button 
+            class="p-1.5 hover:bg-[#383838] rounded-full flex-shrink-0 ml-2"
+            onclick="document.getElementById('player').innerHTML = ''"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+    <div class="p-4">
+        <img src="{{ thumbnail }}" alt="{{ title }}" class="w-full aspect-video object-cover rounded-md mb-3">
+        <audio id="audio-player" controls autoplay preload="auto" class="w-full">
+            <source src="{{ url }}" type="audio/mpeg">
+        </audio>
+    </div>
+</div>
+
+<script>
+    const player = document.getElementById('draggable-player');
+    const handle = document.getElementById('player-handle');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    handle.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    function dragStart(e) {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+
+        if (e.target.closest('#player-handle')) {
+            isDragging = true;
+        }
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, player);
+        }
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    }
+
+    function dragEnd() {
+        isDragging = false;
+    }
+
+    document.getElementById('audio-player').play().catch(e => console.error('Playback failed:', e));
+</script>

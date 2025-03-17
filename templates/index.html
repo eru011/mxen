@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="min-h-screen p-6">
+    <header class="flex items-center gap-4 mb-8">
+        <div class="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+            </svg>
+        </div>
+        <h1 class="text-4xl font-bold text-blue-500">Xen Music</h1>
+    </header>
+
+    <div class="max-w-2xl mx-auto mb-10">
+        <div class="relative flex items-center">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search for songs..."
+                class="w-full px-12 py-4 bg-[#282828] rounded-full text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                hx-get="/search"
+                hx-trigger="keyup changed delay:500ms"
+                hx-target="#results"
+                hx-indicator="#spinner"
+            >
+            <div id="spinner" class="htmx-indicator absolute right-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-24">
+        <!-- Search results will be loaded here -->
+    </div>
+
+    <div id="player" class="fixed bottom-0 left-0 right-0 z-50">
+        <!-- Player will be loaded here -->
+    </div>
+</main>
+{% endblock %}

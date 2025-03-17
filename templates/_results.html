@@ -1,0 +1,31 @@
+{% for result in results %}
+<div class="bg-[#282828] rounded-lg p-4 hover:bg-[#383838] transition-colors">
+    <div class="flex items-center gap-4">
+        <div class="relative w-20 h-20 rounded-md overflow-hidden">
+            <img src="{{ result.thumbnail }}" alt="{{ result.title }}" class="object-cover w-full h-full">
+        </div>
+        <div class="flex-grow min-w-0">
+            <h3 class="font-medium text-sm truncate">{{ result.title }}</h3>
+            <p class="text-sm text-gray-400">{{ result.author }}</p>
+            <div class="flex items-center gap-2 mt-3">
+                <button 
+                    hx-post="/stream/{{ result.id }}"
+                    hx-target="#player"
+                    class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-full text-sm transition-colors"
+                >
+                    Play
+                </button>
+                <a 
+                    href="/download/{{ result.id }}"
+                    class="px-4 py-1.5 bg-[#383838] hover:bg-[#404040] rounded-full text-sm transition-colors flex items-center gap-2"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
