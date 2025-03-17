@@ -5,5 +5,5 @@ yt-dlp
 requests
 jinja2
 python-multipart
-streamlit
 nest-asyncio
+uvicorn
