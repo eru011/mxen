@@ -1,37 +1,43 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import uvicorn
-import threading
-from main import app
-import nest_asyncio
 import requests
-import yt_dlp as ytdl
 import os
+import yt_dlp
 from dotenv import load_dotenv
-from jinja2 import Environment, FileSystemLoader
+import base64
 
-# Load environment variables and setup Jinja2
+# Load environment variables
 load_dotenv()
 YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
-env = Environment(loader=FileSystemLoader('templates'))
 
-# Set page config
+def download_audio(video_id):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'outtmpl': 'temp_%(id)s.%(ext)s'
+    }
+    
+    url = f"https://www.youtube.com/watch?v={video_id}"
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+        return f"temp_{video_id}.mp3"
+
+# Set page config (only once)
 st.set_page_config(
     page_title="Xen Music",
     page_icon="🎵",
     layout="wide"
 )
 
-def render_template(template_name, **kwargs):
-    template = env.get_template(template_name)
-    return template.render(**kwargs)
+# Create Streamlit UI
+st.title("Xen Music")
 
-# Render the main page using your original HTML
-main_html = render_template('index.html', request={})
-components.html(main_html, height=1000, scrolling=True)
-
-# Handle search in Streamlit but render results using your HTML template
-query = st.text_input("Search for songs...", key="search_input")
+# Create search interface
+query = st.text_input("Search for songs...")
 
 if query:
     try:
@@ -48,41 +54,28 @@ if query:
         response.raise_for_status()
         data = response.json()
         
-        results = []
-        for item in data.get('items', []):
+        # Display results in a grid
+        cols = st.columns(3)
+        for idx, item in enumerate(data.get('items', [])):
             if item['id']['kind'] == 'youtube#video':
-                results.append({
-                    'id': item['id']['videoId'],
-                    'title': item['snippet']['title'],
-                    'thumbnail': item['snippet']['thumbnails']['high']['url'],
-                    'author': item['snippet']['channelTitle']
-                })
-        
-        # Render results using your original HTML template
-        results_html = render_template('_results.html', results=results)
-        components.html(results_html, height=600, scrolling=True)
+                with cols[idx % 3]:
+                    st.image(item['snippet']['thumbnails']['high']['url'])
+                    st.write(item['snippet']['title'])
+                    st.write(item['snippet']['channelTitle'])
+                    video_id = item['id']['videoId']
+                    if st.button(f"Download MP3", key=video_id):
+                        with st.spinner('Downloading...'):
+                            file_path = download_audio(video_id)
+                            with open(file_path, "rb") as f:
+                                bytes_data = f.read()
+                                st.download_button(
+                                    label="Download",
+                                    data=bytes_data,
+                                    file_name=f"{item['snippet']['title']}.mp3",
+                                    mime="audio/mpeg"
+                                )
+                            # Clean up temp file
+                            os.remove(file_path)
 
     except Exception as e:
         st.error(f"Search failed: {str(e)}")
-
-
-# Enable nested event loops
-nest_asyncio.apply()
-
-# Set page config
-st.set_page_config(
-    page_title="Xen Music",
-    page_icon="🎵",
-    layout="wide"
-)
-
-def run_fastapi():
-    uvicorn.run(app, host="127.0.0.1", port=8000)
-
-# Start FastAPI in a separate thread
-if 'server_started' not in st.session_state:
-    threading.Thread(target=run_fastapi, daemon=True).start()
-    st.session_state.server_started = True
-
-# Embed your FastAPI frontend with all its interactive features
-components.iframe("http://127.0.0.1:8000", height=800, scrolling=True)
