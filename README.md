@@ -1,6 +1,10 @@
-# Xen Music Backend
+# Music Application Backend
 
-A FastAPI backend for the Xen Music streaming application.
+A FastAPI backend for the Mx music streaming application. 
+
+- Experimental 
+- Using streamlit
+- 
 
 ## Setup
 
