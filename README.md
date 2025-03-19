@@ -1,6 +1,6 @@
 # Music Application Backend
 
-A FastAPI backend for the Mx music streaming application. 
+A experimental code for FastAPI backend for the Mx music streaming application. 
 
 - Experimental 
 - Using streamlit
